@@ -59,19 +59,19 @@ data "aws_iam_policy_document" "main" {
   #
 
   dynamic "statement" {
-    for_each = length(var.ecs_tasks_run) > 0 ? [1] : []
+    for_each = var.ecs_tasks_run
     content {
       sid = "RunTask"
       actions = [
         "ecs:RunTask"
       ]
-      resources = contains(var.ecs_tasks_run[count.index].task_definitions, "*") ? ["*"] : var.ecs_tasks_run[count.index].task_definitions
+      resources = contains(statement.value.task_definitions, "*") ? ["*"] : statement.value.task_definitions
       dynamic "condition" {
-        for_each = contains(var.ecs_tasks_run[count.index].ecs_clusters, "*") ? [] : [1]
+        for_each = contains(statement.value.clusters, "*") ? [] : [1]
         content {
           test     = "ArnEquals"
           variable = "ecs:Cluster"
-          values   = var.ecs_tasks_run[count.index].ecs_clusters
+          values   = statement.value.clusters
         }
       }
     }
